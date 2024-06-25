@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">MiniCalcul</string>
+    <string name="play">Jouer</string>
+    <string name="highscore">Meilleurs Scores</string>
+    <string name="score">Score: %d</string>
+    <string name="lives">Vies: %d</string>
+    <string name="calculation">%d + %d = ?</string>
+    <string name="enter_answer">Entrez votre réponse</string>
+    <string name="submit">Soumettre</string>
+    <string name="enter_name">Entrez votre pseudo</string>
+    <string name="save">Enregistrer</string>
+    <string name="highscore_display">Meilleur score: %s - %d points</string>
+    <string name="no_highscores">Aucun score enregistré</string>
+    <string name="title_activity_game">MiniCalcul - Jeu de Calcul Mental</string>
 </resources>
