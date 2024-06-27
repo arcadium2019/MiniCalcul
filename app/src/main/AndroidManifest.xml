@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.minicalcul">
+
+    <!-- Permission pour écrire dans le stockage externe -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -12,20 +16,35 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MiniCalcul"
         tools:targetApi="31" >
-        <activity
-            android:name=".GameActivity"
-            android:exported="false"
-            android:label="@string/title_activity_game"
-            android:theme="@style/Theme.MiniCalcul" />
+
+        <!-- Activité MainActivity (activité principale) -->
         <activity
             android:name=".MainActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Activité GameActivity -->
+        <activity
+            android:name=".GameActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MiniCalcul" />
+
+        <!-- Activité HighScoreActivity -->
+        <activity
+            android:name=".HighScoreActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MiniCalcul" />
+
+        <!-- Activité ScoreActivity -->
+        <activity
+            android:name=".ScoreActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MiniCalcul" />
+
     </application>
 
 </manifest>

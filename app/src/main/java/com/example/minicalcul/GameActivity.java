@@ -2,85 +2,131 @@ package com.example.minicalcul;
 
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import android.widget.Toast;
 import java.util.Random;
 
 public class GameActivity extends AppCompatActivity {
-    private TextView tvScore;
-    private TextView tvLives;
-    private TextView tvCalculation;
-    private EditText etAnswer;
-    private Button btnSubmit;
-
     private int score = 0;
     private int lives = 3;
-    private int correctAnswer;
+    private int correctAnswers = 0; // Compteur de bonnes réponses
+    private TextView scoreTextView;
+    private TextView livesTextView;
+    private TextView questionTextView;
+    private EditText answerEditText;
+    private DBHelper dbHelper;
+    private Random rand;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        scoreTextView = findViewById(R.id.scoreTextView);
+        livesTextView = findViewById(R.id.livesTextView);
+        questionTextView = findViewById(R.id.questionTextView);
+        answerEditText = findViewById(R.id.answerEditText);
 
-        tvScore = findViewById(R.id.tv_score);
-        tvLives = findViewById(R.id.tv_lives);
-        tvCalculation = findViewById(R.id.tv_calculation);
-        etAnswer = findViewById(R.id.et_answer);
-        btnSubmit = findViewById(R.id.btn_submit);
+        dbHelper = new DBHelper(this); // Initialisation du dbHelper
+        rand = new Random();
 
         updateScoreAndLives();
-        generateNewCalculation();
 
-        btnSubmit.setOnClickListener(v -> checkAnswer());
+        Button submitButton = findViewById(R.id.submitButton);
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkAnswer();
+            }
+        });
     }
 
     private void updateScoreAndLives() {
-        tvScore.setText(getString(R.string.score, score));
-        tvLives.setText(getString(R.string.lives, lives));
+        scoreTextView.setText(getString(R.string.score_label, score));
+        livesTextView.setText(getString(R.string.lives_label, lives));
+        generateQuestion();
     }
 
-    private void generateNewCalculation() {
-        Random random = new Random();
-        int number1 = random.nextInt(10) + 1;
-        int number2 = random.nextInt(10) + 1;
-        correctAnswer = number1 + number2;
+    private void generateQuestion() {
+        int a, b;
+        String operatorString;
+        int result;
 
-        tvCalculation.setText(getString(R.string.calculation, number1, number2));
+        // Augmentation de la difficulté en fonction du nombre de bonnes réponses
+        if (correctAnswers < 5) {
+            // Niveau facile : nombres entre 1 et 20 inclus
+            a = rand.nextInt(20) + 1;
+            b = rand.nextInt(20) + 1;
+        } else if (correctAnswers < 10) {
+            // Niveau moyen : nombres entre 1 et 50 inclus
+            a = rand.nextInt(50) + 1;
+            b = rand.nextInt(50) + 1;
+        } else {
+            // Niveau difficile : nombres entre 1 et 100 inclus
+            a = rand.nextInt(100) + 1;
+            b = rand.nextInt(100) + 1;
+        }
+
+        int operator = rand.nextInt(2); // 0: +, 1: *
+
+        if (operator == 0) {
+            operatorString = " + ";
+            result = a + b;
+        } else {
+            operatorString = " * ";
+            result = a * b;
+        }
+
+        questionTextView.setText(getString(R.string.question_label, a, operatorString, b));
+        questionTextView.setTag(result); // Tagging the correct answer with the TextView
     }
 
     private void checkAnswer() {
-        String answerText = etAnswer.getText().toString();
-        if (!answerText.isEmpty()) {
-            int answer = Integer.parseInt(answerText);
-            if (answer == correctAnswer) {
-                score++;
-            } else {
-                lives--;
-            }
+        String answerStr = answerEditText.getText().toString().trim();
+        if (answerStr.isEmpty()) {
+            Toast.makeText(GameActivity.this, R.string.empty_answer_message, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            updateScoreAndLives();
-            etAnswer.setText("");
+        int answer;
+        try {
+            answer = Integer.parseInt(answerStr);
+        } catch (NumberFormatException e) {
+            Toast.makeText(GameActivity.this, R.string.empty_answer_message, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            if (lives > 0) {
-                generateNewCalculation();
-            } else {
-                endGame();
+        int correctAnswer = (int) questionTextView.getTag();
+
+        if (answer == correctAnswer) {
+            score++;
+            correctAnswers++;
+            Toast.makeText(GameActivity.this, R.string.correct_answer_message, Toast.LENGTH_SHORT).show();
+        } else {
+            lives--;
+            correctAnswers = 0; // Réinitialiser le compteur en cas de mauvaise réponse
+            Toast.makeText(GameActivity.this, R.string.wrong_answer_message, Toast.LENGTH_SHORT).show();
+            if (lives == 0) {
+                gameOver();
+                return;
             }
         }
+
+        updateScoreAndLives();
+
+        // Vider le champ de texte answerEditText
+        answerEditText.setText("");
     }
 
-    private void endGame() {
-        Intent intent = new Intent(GameActivity.this, SaveScoreActivity.class);
+    private void gameOver() {
+        // Redirection vers l'activité de saisie du pseudo
+        Intent intent = new Intent(GameActivity.this, ScoreActivity.class);
         intent.putExtra("score", score);
         startActivity(intent);
         finish();
     }
-
 }
